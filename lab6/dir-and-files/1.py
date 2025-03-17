@@ -25,6 +25,6 @@ else:
     print("Error: The specified path does not exist.")
 
 # /Users/arsenijkansin/Documents/labpp2/lab6
-# /Users/arsenijkansin/Documents/labpp2/lab6/dir-and-files
+# /Users/arsenijkansin/Documents/labpp2/lab6/dir-and-files/s.txt
 
 

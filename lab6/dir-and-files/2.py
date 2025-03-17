@@ -21,3 +21,5 @@ def check_path_access(path):
 specified_path = input("Enter the directory or file path: ")
 
 check_path_access(specified_path)
+
+#/Users/arsenijkansin/Documents/labpp2/lab6/dir-and-files/s.txt
