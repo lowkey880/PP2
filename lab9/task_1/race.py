@@ -8,29 +8,29 @@ WIDTH, HEIGHT = 600, 800
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Racer with Coins & PNGs")
 clock = pygame.time.Clock()
-
 font = pygame.font.SysFont("Arial", 24)
 
-background_img = pygame.image.load("/Users/arsenijkansin/Documents/labpp2/lab8/t-1/set/road_back.png").convert()
+background_img = pygame.image.load("/Users/arsenijkansin/Documents/labpp2/lab9/task_1/set/road_back.png").convert()
 background_img = pygame.transform.scale(background_img, (WIDTH, HEIGHT))
 
-player_img = pygame.image.load("/Users/arsenijkansin/Documents/labpp2/lab8/t-1/set/car.png").convert_alpha()
+player_img = pygame.image.load("/Users/arsenijkansin/Documents/labpp2/lab9/task_1/set/car.png").convert_alpha()
 player_img = pygame.transform.scale(player_img, (60, 80))
 player_rect = player_img.get_rect(center=(WIDTH // 2, HEIGHT - 80))
 
-enemy_img = pygame.image.load("/Users/arsenijkansin/Documents/labpp2/lab8/t-1/set/enemy_car.png").convert_alpha()
+enemy_img = pygame.image.load("/Users/arsenijkansin/Documents/labpp2/lab9/task_1/set/enemy_car.png").convert_alpha()
 enemy_img = pygame.transform.scale(enemy_img, (60, 80))
 
-coin_img = pygame.image.load("/Users/arsenijkansin/Documents/labpp2/lab8/t-1/set/coin.png").convert_alpha()
+coin_img = pygame.image.load("/Users/arsenijkansin/Documents/labpp2/lab9/task_1/set/coin.png").convert_alpha()
 coin_img = pygame.transform.scale(coin_img, (40, 40))
 
 player_speed = 5
 coin_score = 0
 enemy_speed_increase = 0
+SPEED_UP_EVERY_N_COINS = 5
 
 enemies = []
 for _ in range(3):
-    x = random.randint(40, WIDTH - 100)
+    x = random.randint(40, WIDTH - 40)
     y = random.randint(-600, -100)
     speed = random.randint(3, 6)
     rect = enemy_img.get_rect(topleft=(x, y))
@@ -38,10 +38,11 @@ for _ in range(3):
 
 coins = []
 for _ in range(3):
-    x = random.randint(40, WIDTH - 80)
+    x = random.randint(40, WIDTH - 40)
     y = random.randint(-600, -100)
     rect = coin_img.get_rect(topleft=(x, y))
-    coins.append(rect)
+    weight = random.randint(1, 3)
+    coins.append({"rect": rect, "weight": weight})
 
 running = True
 while running:
@@ -61,14 +62,16 @@ while running:
     for enemy in enemies:
         enemy["rect"].y += enemy["speed"]
         if enemy["rect"].top > HEIGHT:
-            enemy["rect"].x = random.randint(40, WIDTH - 100)
+            enemy["rect"].x = random.randint(40, WIDTH - 40)
             enemy["rect"].y = random.randint(-600, -100)
             enemy["speed"] = random.randint(3, 6) + enemy_speed_increase
 
     for coin in coins:
-        coin.y += 4
-        if coin.top > HEIGHT:
-            coin.topleft = (random.randint(40, WIDTH - 80), random.randint(-600, -100))
+        coin["rect"].y += 4
+        if coin["rect"].top > HEIGHT:
+            coin["rect"].x = random.randint(40, WIDTH - 40)
+            coin["rect"].y = random.randint(-600, -100)
+            coin["weight"] = random.randint(1, 3)
 
     for enemy in enemies:
         if player_rect.colliderect(enemy["rect"]):
@@ -80,10 +83,12 @@ while running:
             sys.exit()
 
     for coin in coins:
-        if player_rect.colliderect(coin):
-            coin_score += 1
-            coin.topleft = (random.randint(40, WIDTH - 80), random.randint(-600, -100))
-            if coin_score % 3 == 0:
+        if player_rect.colliderect(coin["rect"]):
+            coin_score += coin["weight"]
+            coin["rect"].x = random.randint(40, WIDTH - 40)
+            coin["rect"].y = random.randint(-600, -100)
+            coin["weight"] = random.randint(1, 3)
+            if coin_score // SPEED_UP_EVERY_N_COINS > enemy_speed_increase:
                 enemy_speed_increase += 1
 
     screen.blit(player_img, player_rect)
@@ -92,10 +97,10 @@ while running:
         screen.blit(enemy_img, enemy["rect"])
 
     for coin in coins:
-        screen.blit(coin_img, coin)
+        screen.blit(coin_img, coin["rect"])
 
     score_text = font.render(f"Coins: {coin_score}", True, (0, 0, 0))
-    screen.blit(score_text, (WIDTH - 120, 10))
+    screen.blit(score_text, (WIDTH - 140, 10))
 
     pygame.display.update()
     clock.tick(60)
