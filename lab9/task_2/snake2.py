@@ -9,16 +9,19 @@ CELL_SIZE = 20
 COLS = WIDTH // CELL_SIZE
 ROWS = HEIGHT // CELL_SIZE
 
+
 WHITE = (255, 255, 255)
 GREEN = (0, 200, 0)
 RED = (200, 0, 0)
 BLACK = (0, 0, 0)
 GRAY = (50, 50, 50)
+YELLOW = (255, 255, 0)
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Snake_Game")
 clock = pygame.time.Clock()
 font = pygame.font.SysFont("Arial", 24)
+
 
 snake = [(5, 5), (4, 5), (3, 5)]
 direction = (1, 0)
@@ -26,8 +29,8 @@ score = 0
 level = 1
 speed = 10
 
-walls = []
 
+walls = []
 for x in range(COLS):
 
     walls.append((x, 0))
@@ -40,28 +43,11 @@ for y in range(ROWS):
 
     walls.append((COLS - 1, y))
 
-def draw_game(food_pos):
 
-    screen.fill(BLACK)
-
-
-    for wall in walls:
-
-        pygame.draw.rect(screen, GRAY, (wall[0]*CELL_SIZE, wall[1]*CELL_SIZE, CELL_SIZE, CELL_SIZE))
-
-    for segment in snake:
-
-        pygame.draw.rect(screen, GREEN, (segment[0]*CELL_SIZE, segment[1]*CELL_SIZE, CELL_SIZE, CELL_SIZE))
-
-    pygame.draw.rect(screen, RED, (food_pos[0]*CELL_SIZE, food_pos[1]*CELL_SIZE, CELL_SIZE, CELL_SIZE))
-
-    score_text = font.render(f"Score: {score}", True, WHITE)
-    level_text = font.render(f"Level: {level}", True, WHITE)
-    screen.blit(score_text, (10, 10))
-    screen.blit(level_text, (WIDTH - 120, 10))
-
-    pygame.display.update()
-
+food = None  
+food_weight = 1  
+food_timer = 0 
+FOOD_LIFESPAN = 50  
 def get_food_position():
 
     while True:
@@ -73,6 +59,31 @@ def get_food_position():
         if (x, y) not in snake and (x, y) not in walls:
 
             return (x, y)
+
+
+def draw_game(food_pos):
+
+    screen.fill(BLACK)
+
+    for wall in walls:
+
+        pygame.draw.rect(screen, GRAY, (wall[0]*CELL_SIZE, wall[1]*CELL_SIZE, CELL_SIZE, CELL_SIZE))
+
+    for segment in snake:
+
+        pygame.draw.rect(screen, GREEN, (segment[0]*CELL_SIZE, segment[1]*CELL_SIZE, CELL_SIZE, CELL_SIZE))
+
+    pygame.draw.rect(screen, RED, (food_pos[0]*CELL_SIZE, food_pos[1]*CELL_SIZE, CELL_SIZE, CELL_SIZE))
+    
+    weight_text = font.render(str(food_weight), True, YELLOW)
+    screen.blit(weight_text, (food_pos[0]*CELL_SIZE + 5, food_pos[1]*CELL_SIZE + 2))
+
+    score_text = font.render(f"Score: {score}", True, WHITE)
+    level_text = font.render(f"Level: {level}", True, WHITE)
+    screen.blit(score_text, (10, 10))
+    screen.blit(level_text, (WIDTH - 120, 10))
+
+    pygame.display.update()
 
 def show_game_over_screen():
 
@@ -91,7 +102,6 @@ def show_game_over_screen():
     pygame.display.update()
 
     waiting = True
-
     while waiting:
 
         for event in pygame.event.get():
@@ -102,16 +112,15 @@ def show_game_over_screen():
 
                 sys.exit()
 
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
 
-                if event.key == pygame.K_ESCAPE:
-
-                    waiting = False
+                waiting = False
 
 food = get_food_position()
+food_weight = random.randint(1, 3)  
+food_timer = FOOD_LIFESPAN  
 
 running = True
-
 while running:
 
     clock.tick(speed)
@@ -125,7 +134,6 @@ while running:
             sys.exit()
 
     keys = pygame.key.get_pressed()
-
     if keys[pygame.K_UP] and direction != (0, 1):
 
         direction = (0, -1)
@@ -156,17 +164,24 @@ while running:
 
     if new_head == food:
 
-        score += 1
-
+        score += food_weight  
         food = get_food_position()
+        food_weight = random.randint(1, 3)  
+        food_timer = FOOD_LIFESPAN  
 
-        if score % 3 == 0:
+        if score // 5 + 1 > level:
 
             level += 1
-
             speed += 2
     else:
 
-        snake.pop()
+        snake.pop()  
+
+    food_timer -= 1
+    if food_timer <= 0:
+
+        food = get_food_position()
+        food_weight = random.randint(1, 3)
+        food_timer = FOOD_LIFESPAN
 
     draw_game(food)
