@@ -373,3 +373,8 @@ def menu():
 if __name__ == "__main__":
     
     menu()
+
+#psql -U arsenijkansin -d Tsk_2
+#\dt
+#SELECT * FROM users;
+#SELECT * FROM user_scores;
